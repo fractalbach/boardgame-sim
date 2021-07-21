@@ -1,10 +1,11 @@
 extends Spatial
 
 signal clicked(node, click_position)
+signal ctrl_clicked(node, card_num, card_suit)
 
 var _is_highlighted: bool = false
 var _is_half_clicked: bool = false
-var _is_face_down: bool = false
+var _is_face_down: bool = true
 
 var card_num = 0
 var card_suit = 0
@@ -48,21 +49,43 @@ func set_highlighted(state: bool) -> void:
 	$StaticBody/MeshInstance2.get_surface_material(0).albedo_color = color
 
 
+func play_falling_animation() -> void:
+	$AnimationPlayer.play("fall")
+
+
+func destroy() -> void:
+	$AnimationPlayer.stop()
+	$AnimationPlayer.play("destroy")
+
+
 func _on_StaticBody_input_event(camera: Node, event: InputEvent, click_position: Vector3, click_normal: Vector3, shape_idx: int) -> void:
+	
 	if not (event is InputEventMouseButton):
 		return
+	
 	if not (event.button_index == BUTTON_LEFT):
 		return
+	
 	if event.pressed == true:
 		_is_half_clicked = true
+	
 	if (event.pressed == false) and (_is_half_clicked):
 		_is_half_clicked = false
 		if (Input.is_key_pressed(KEY_SHIFT)):
 			print('flipping card')
 			set_face_down(!_is_face_down)
-			return
-		emit_signal("clicked", self, click_position)
+		elif (Input.is_key_pressed(KEY_CONTROL)):
+			emit_signal("ctrl_clicked", self, card_suit, card_num)
+		else:
+			emit_signal("clicked", self, click_position)
 
 
 func _on_StaticBody_mouse_exited() -> void:
 	_is_half_clicked = false
+
+
+
+func _on_AnimationPlayer_animation_finished(anim_name: String) -> void:
+	if anim_name == "destroyed":
+		queue_free()
+

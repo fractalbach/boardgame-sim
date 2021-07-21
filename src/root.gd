@@ -4,8 +4,8 @@ var Player = preload("res://player/player.tscn")
 var Card = preload("res://card/card.tscn")
 
 var selected_object: Node = null
-var players = []
-var cards = []
+var players = {}
+var cards = {}
 var rng = RandomNumberGenerator.new()
 
 
@@ -27,7 +27,7 @@ func init_players() -> void:
 		var p = new_player(color, loc)
 		# p.set_height(0.1 + 0.01 * i)
 		p.set_height(0.1 + 0.01)
-		players.push_back(p)
+		players[p] = true
 
 #
 #func init_cards() -> void:
@@ -36,7 +36,7 @@ func init_players() -> void:
 #		var suit = rng.randi_range(1,4)
 #		var num = rng.randi_range(1,13)
 #		var c = new_card(loc, suit, num)
-#		cards.push_back(c)
+#		cards[c]
 #	return
 
 
@@ -50,12 +50,13 @@ func new_player(color: Color, location: Vector2) -> Node:
 	return p
 
 
-func new_card(location: Vector3, suit: int, num: int) -> Node:
+func new_card(translation: Vector3, suit: int, num: int) -> Node:
 	var c = Card.instance()
 	c.set_card(suit, num)
 	c.connect("clicked", self, "_on_card_clicked")
+	c.connect("ctrl_clicked", self, "_on_card_ctrl_clicked")
 	add_child(c)
-	c.translation = location
+	c.translation = translation
 	return c
 
 
@@ -120,6 +121,19 @@ func _on_CardDeck_card_drawn(node, card_array) -> void:
 	var xdiff = r * cos(theta)
 	var zdiff = r * sin(theta)
 	var loc = $CardDeck.translation + Vector3(xdiff, 0, zdiff)
+	loc.y = 0
 	var c = new_card(loc, suit, num)
-	cards.push_back(c)
+	cards[c] = true
+	$CardDeck/AnimationPlayer.stop()
+	$CardDeck/AnimationPlayer.play("draw")
+	c.play_falling_animation()
+	print(cards)
+
+
+func _on_card_ctrl_clicked(node, suit, num) -> void:
+	cards.erase(node)
+	print(cards)
+	$CardDeck.add_card_and_shuffle(suit, num)
+	node.destroy()
+
 

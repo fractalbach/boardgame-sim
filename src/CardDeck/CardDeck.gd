@@ -34,9 +34,11 @@ func draw_card() -> Array:
 	return cards.pop_front()
 
 
-func add_card_and_shuffle(card: Array) -> void:
-	cards.push_back(card)
+func add_card_and_shuffle(suit, num) -> void:
+	cards.push_back([suit, num])
 	shuffle()
+	$AnimationPlayer.stop()
+	$AnimationPlayer.play_backwards("draw")
 
 
 func set_highlighted(state: bool) -> void:
@@ -71,3 +73,4 @@ func _on_StaticBody_input_event(camera: Node, event: InputEvent, click_position:
 
 func _on_StaticBody_mouse_exited() -> void:
 	_is_half_clicked_left = false
+
