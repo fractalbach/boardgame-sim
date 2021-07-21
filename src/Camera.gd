@@ -3,8 +3,11 @@ extends Camera
 var MIN_ZOOM_HEIGHT = 0.1
 var MAX_ZOOM_HEIGHT = 50
 
+var original_transform: Transform
+
 func _ready() -> void:
-	pass
+	original_transform = transform
+
 
 func _unhandled_input(event: InputEvent) -> void:
 	
@@ -41,3 +44,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if self.translation.y < MAX_ZOOM_HEIGHT:
 			self.translation.y += 0.1
 	
+
+
+func _on_Button_ResetCamera_pressed() -> void:
+	transform = original_transform
